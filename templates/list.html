@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block title %}{{ t.title }} — Заправки Тюмени{% endblock %}
+{% block content %}
+<div class="bar">
+  <h1>{{ t.title }}</h1>
+  <a class="btn" href="{{ url_for('create_row', table=table) }}">+ Добавить</a>
+</div>
+
+{% if rows %}
+<table class="data">
+  <tr>
+    <th>№</th>
+    {% for c in columns %}<th>{{ c.label }}</th>{% endfor %}
+    <th></th>
+  </tr>
+  {% for row in rows %}
+    <tr>
+      <td>{{ row.id }}</td>
+      {% for c in columns %}
+        {# У внешнего ключа показываем название, а не номер. #}
+        <td>{% if c.kind == 'ref' %}{{ row[c.name ~ '__label'] | show }}{% else %}{{ row[c.name] | show }}{% endif %}</td>
+      {% endfor %}
+      <td class="actions">
+        {% if table == 'stations' %}<a class="btn small light" href="{{ url_for('station_card', station_id=row.id) }}">Карточка</a>{% endif %}
+        <a class="btn small light" href="{{ url_for('edit_row', table=table, row_id=row.id) }}">Изменить</a>
+        <form method="post" action="{{ url_for('delete_row', table=table, row_id=row.id) }}"
+              onsubmit="return confirm('Удалить запись № {{ row.id }}?');">
+          <button class="btn small danger" type="submit">Удалить</button>
+        </form>
+      </td>
+    </tr>
+  {% endfor %}
+</table>
+{% else %}
+<p class="muted">Записей пока нет.</p>
+{% endif %}
+{% endblock %}

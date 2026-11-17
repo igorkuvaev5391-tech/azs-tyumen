@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% block title %}{{ t.title }} — Заправки Тюмени{% endblock %}
+{% block content %}
+<h1>{% if row_id %}{{ t.title }}: изменение записи № {{ row_id }}{% else %}{{ t.title }}: новая запись{% endif %}</h1>
+
+{% if error %}
+  <div class="msg error"><b>База не приняла запись, ничего не сохранено.</b><br>{{ error }}</div>
+{% endif %}
+
+<form class="edit" method="post">
+  {% for c in columns %}
+    {% set v = values.get(c.name, '') %}
+    {% if c.kind == 'bool' %}
+      <div class="field check">
+        <input type="checkbox" id="{{ c.name }}" name="{{ c.name }}" {% if v %}checked{% endif %}>
+        <label for="{{ c.name }}">{{ c.label }}</label>
+      </div>
+    {% else %}
+      <div class="field">
+        <label for="{{ c.name }}">{{ c.label }}{% if c.required or (c.kind == 'password' and not row_id) %} <span class="req">*</span>{% endif %}</label>
+        {% if c.kind == 'ref' %}
+          {# Внешний ключ: выбор из связанной таблицы, на экране название. #}
+          <select id="{{ c.name }}" name="{{ c.name }}">
+            {% if not c.required %}<option value="">— не выбрано —</option>{% endif %}
+            {% for o in options[c.name] %}
+              <option value="{{ o.id }}" {% if v|string == o.id|string %}selected{% endif %}>{{ o.label }}</option>
+            {% endfor %}
+          </select>
+        {% elif c.kind == 'choice' %}
+          <select id="{{ c.name }}" name="{{ c.name }}">
+            {% for o in c.options %}<option {% if v == o %}selected{% endif %}>{{ o }}</option>{% endfor %}
+          </select>
+        {% elif c.kind == 'password' %}
+          <input type="password" id="{{ c.name }}" name="{{ c.name }}" autocomplete="new-password">
+        {% else %}
+          <input id="{{ c.name }}" name="{{ c.name }}" value="{{ v }}"
+                 type="{{ {'number': 'number', 'date': 'date', 'time': 'time', 'datetime': 'datetime-local'}.get(c.kind, 'text') }}"
+                 {% if c.step %}step="{{ c.step }}"{% endif %}
+                 {% if c.example %}placeholder="например: {{ c.example }}"{% endif %}>
+        {% endif %}
+        {% if c.hint and (c.kind != 'password' or row_id) %}<div class="hint">{{ c.hint }}</div>{% endif %}
+      </div>
+    {% endif %}
+  {% endfor %}
+  <button class="btn" type="submit">Сохранить</button>
+  <a class="btn light" href="{{ url_for('list_rows', table=table) }}">Отмена</a>
+</form>
+{% endblock %}

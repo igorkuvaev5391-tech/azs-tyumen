@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Заправки Тюмени</h1>
+<p class="muted">Учёт АЗС города и отметок о наличии топлива. Выбери таблицу, чтобы посмотреть, добавить, изменить или удалить записи.</p>
+
+<div class="tiles">
+  {% for name, t in tables.items() %}
+    <a class="tile" href="{{ url_for('list_rows', table=name) }}">
+      <b>{{ counts[name] }}</b>{{ t.title }}
+    </a>
+  {% endfor %}
+</div>
+
+<h2>Карточки АЗС</h2>
+<table class="data">
+  <tr><th>АЗС</th><th>Адрес</th><th>Статус</th><th></th></tr>
+  {% for s in stations %}
+    <tr>
+      <td>{{ s.label }}</td>
+      <td>{{ s.street }}</td>
+      <td>{{ s.status }}</td>
+      <td class="actions"><a class="btn small light" href="{{ url_for('station_card', station_id=s.id) }}">Карточка</a></td>
+    </tr>
+  {% endfor %}
+</table>
+{% endblock %}

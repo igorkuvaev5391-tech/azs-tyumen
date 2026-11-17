@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block title %}Карточка АЗС — Заправки Тюмени{% endblock %}
+{% block content %}
+<div class="bar">
+  <h1>Карточка АЗС № {{ s.number }}, сеть «{{ s.network }}»</h1>
+  <a class="btn light" href="{{ url_for('list_rows', table='stations') }}">К списку АЗС</a>
+</div>
+
+<dl class="card">
+  <dt>Сформирована</dt><dd>{{ now | show }}</dd>
+  <dt>Адрес</dt><dd>г. Тюмень, {{ s.street }}, д. {{ s.house }}; район {{ s.district }}</dd>
+  <dt>Координаты</dt><dd>{{ s.latitude }}, {{ s.longitude }}</dd>
+  <dt>Режим работы</dt><dd>{% if s.is_24h %}круглосуточно{% else %}{{ s.opens_at | show }}–{{ s.closes_at | show }}{% endif %}</dd>
+  <dt>Телефон</dt><dd>{{ s.phone | show }}</dd>
+  <dt>Горячая линия сети</dt><dd>{{ s.hotline | show }}</dd>
+  <dt>Статус АЗС</dt><dd>{{ s.status }}</dd>
+</dl>
+
+<h2>Наличие топлива</h2>
+{% if fuels %}
+<table class="data">
+  <tr><th>Вид топлива</th><th>Статус</th><th>Цена, ₽/л</th><th>Обновлено</th><th>Источник</th></tr>
+  {% for f in fuels %}
+    <tr>
+      <td>{{ f.name }}</td>
+      <td class="status-{{ f.status | replace(' ', '-') }}">{{ f.status }}</td>
+      <td>{{ f.price | show }}</td>
+      <td>{{ f.updated_at | show }}</td>
+      <td>{{ f.source | show }}</td>
+    </tr>
+  {% endfor %}
+</table>
+<p class="muted">Статус считается по отметкам за последние 2 часа, кроме отклонённых (представление fuel_status).</p>
+{% else %}
+<p class="muted">АЗС закрыта: наличие топлива не показывается.</p>
+{% endif %}
+{% endblock %}
